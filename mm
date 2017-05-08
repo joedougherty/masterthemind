@@ -9,17 +9,16 @@ import sys
 
 
 def random_color(colors):
-    colors = list(colors)
     return colors[randint(0, len(colors)-1)]
 
 
-def generate_puzzle(num_pegs, ensure_unique_colors=False, settings=None):
-    puzzle = [random_color(set(list(settings.possible_colors))) for x in range(0, num_pegs)]
+def generate_puzzle(num_pegs, possible_colors, ensure_unique_colors=False):
+    puzzle = [random_color(possible_colors) for x in range(0, num_pegs)]
     if ensure_unique_colors:
         if len(puzzle) == len(set(puzzle)):
             return puzzle
         else:
-            return generate_puzzle(num_pegs, ensure_unique_colors=True, settings=settings)
+            return generate_puzzle(num_pegs, possible_colors, ensure_unique_colors=True)
     return puzzle
 
 
@@ -50,7 +49,7 @@ def capture_guess(prompt='\nmaster the mind! => '):
 
 def main(settings):
     num_guesses = 1
-    solution = generate_puzzle(settings.num_pegs, (not settings.possible_color_repetition), settings)
+    solution = generate_puzzle(settings.num_pegs, settings.possible_colors, (not settings.possible_color_repetition))
     guess = capture_guess()
     provide_feedback(guess, solution, num_guesses)
 
@@ -78,7 +77,7 @@ def display_settings(settings):
 
 
 def settings_are_sane(settings):
-    if (not settings.possible_color_repetition) and (settings.num_pegs > len(set(list(settings.possible_colors)))):
+    if (not settings.possible_color_repetition) and (settings.num_pegs > settings.possible_colors):
         msg = """The number of pegs can't be higher than the number"""
         msg = msg + """ of possible colors unless you also set --possible_color_repetition."""
         print(msg)
@@ -94,6 +93,7 @@ if __name__ == '__main__':
     colors_help = "A string composed of individual letters, each representing a color. Example: RBGYV"
     parser.add_argument('--possible_colors', required=False, type=str, default='RGBWY', help=colors_help)
     settings = parser.parse_args()
+    settings.possible_colors = list(set(settings.possible_colors))
 
     display_settings(settings)
     if settings_are_sane(settings):
