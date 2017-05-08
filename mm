@@ -91,7 +91,8 @@ if __name__ == '__main__':
     parser.add_argument('--possible_color_repetition', required=False, action="store_true", default=False)
     parser.add_argument('--max_guesses', required=False, type=int, default=12)
     parser.add_argument('--num_pegs', required=False, type=int, default=4)
-    parser.add_argument('--possible_colors', required=False, type=str, default='RGBWY')
+    colors_help = "A string composed of individual letters, each representing a color. Example: RBGYV"
+    parser.add_argument('--possible_colors', required=False, type=str, default='RGBWY', help=colors_help)
     settings = parser.parse_args()
 
     display_settings(settings)
