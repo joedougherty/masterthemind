@@ -47,7 +47,7 @@ def capture_guess(prompt='master the mind! => '):
 
 def main(settings):
     num_guesses = 1
-    solution = generate_puzzle(settings.num_pegs, settings.possible_color_repetition) 
+    solution = generate_puzzle(settings.num_pegs, (not settings.possible_color_repetition))
     guess = capture_guess()
     provide_feedback(guess, solution, num_guesses)
 
@@ -75,6 +75,16 @@ def display_settings(settings):
     for setting_name in settings.__dict__.keys():
         print('{}: {}'.format(prettify_setting(setting_name), settings.__dict__.get(setting_name)))
 
+
+def settings_are_sane(settings):
+    if (not settings.possible_color_repetition) and (settings.num_pegs > len(COLORS)):
+        msg = """The number of pegs can't be higher than the number"""
+        msg = msg + """ of possible colors unless you also set --possible_color_repetition."""
+        print(msg)
+        return False
+    return True
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="master.the.mind")
     parser.add_argument('--possible_color_repetition', required=False, action="store_true", default=False)
@@ -83,4 +93,5 @@ if __name__ == '__main__':
     settings = parser.parse_args()
 
     display_settings(settings)
-    main(settings)
+    if settings_are_sane(settings):
+        main(settings)
