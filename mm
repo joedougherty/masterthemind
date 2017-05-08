@@ -40,7 +40,7 @@ def provide_feedback(guess, solution, guess_num=0):
     print('Correct Color: {}'.format(evaluation.count('W')))
 
 
-def capture_guess(prompt='master the mind! => '):
+def capture_guess(prompt='\nmaster the mind! => '):
     try:
         return list(input(prompt).lstrip().rstrip())
     except KeyboardInterrupt:
