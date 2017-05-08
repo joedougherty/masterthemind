@@ -7,20 +7,19 @@ from random import randint
 from six.moves import input
 import sys
 
-COLORS = ('R', 'G', 'B', 'W', 'Y')
 
-
-def random_color(colors=COLORS):
+def random_color(colors):
+    colors = list(colors)
     return colors[randint(0, len(colors)-1)]
 
 
-def generate_puzzle(num_pegs, ensure_unique_colors=False):
-    puzzle = [random_color() for x in range(0, num_pegs)]
+def generate_puzzle(num_pegs, ensure_unique_colors=False, settings=None):
+    puzzle = [random_color(set(list(settings.possible_colors))) for x in range(0, num_pegs)]
     if ensure_unique_colors:
         if len(puzzle) == len(set(puzzle)):
             return puzzle
         else:
-            return generate_puzzle(num_pegs, ensure_unique_colors=True)
+            return generate_puzzle(num_pegs, ensure_unique_colors=True, settings=settings)
     return puzzle
 
 
@@ -42,12 +41,16 @@ def provide_feedback(guess, solution, guess_num=0):
 
 
 def capture_guess(prompt='master the mind! => '):
-    return list(input(prompt).lstrip().rstrip())
+    try:
+        return list(input(prompt).lstrip().rstrip())
+    except KeyboardInterrupt:
+        print('Goodbye!')
+        sys.exit(0)
 
 
 def main(settings):
     num_guesses = 1
-    solution = generate_puzzle(settings.num_pegs, (not settings.possible_color_repetition))
+    solution = generate_puzzle(settings.num_pegs, (not settings.possible_color_repetition), settings)
     guess = capture_guess()
     provide_feedback(guess, solution, num_guesses)
 
@@ -67,8 +70,6 @@ def main(settings):
 
 
 def display_settings(settings):
-    print('Possible Colors: {}'.format(','.join(COLORS)))
-
     def prettify_setting(setting_name):
         return setting_name.title().replace('_', ' ')
 
@@ -77,7 +78,7 @@ def display_settings(settings):
 
 
 def settings_are_sane(settings):
-    if (not settings.possible_color_repetition) and (settings.num_pegs > len(COLORS)):
+    if (not settings.possible_color_repetition) and (settings.num_pegs > len(set(list(settings.possible_colors)))):
         msg = """The number of pegs can't be higher than the number"""
         msg = msg + """ of possible colors unless you also set --possible_color_repetition."""
         print(msg)
@@ -90,6 +91,7 @@ if __name__ == '__main__':
     parser.add_argument('--possible_color_repetition', required=False, action="store_true", default=False)
     parser.add_argument('--max_guesses', required=False, type=int, default=12)
     parser.add_argument('--num_pegs', required=False, type=int, default=4)
+    parser.add_argument('--possible_colors', required=False, type=str, default='RGBWY')
     settings = parser.parse_args()
 
     display_settings(settings)
